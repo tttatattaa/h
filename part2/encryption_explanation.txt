@@ -1,0 +1,40 @@
+Part 2: Database Encryption Explaination:
+
+To encrypt the database, I used fernet to encrypt individual database fields of the gift card data. 
+Once this is implementated, the values will be automatically encrypted before storing in the database 
+and also decrypted automatically when retrieved from the database. 
+
+
+I imported fernet in models.py and encrpted these fields- data, amount, and fp .
+
+data = EncryptedBinaryField()
+amount = EncryptedIntegerField()
+fp = EncryptedCharField(max_length=100)
+
+The database only has the encrypted value of the data, amount and fp fields as I have shown below- 
+
+# sqlite3 db.sqlite3 'select * from LegacySite_card' 
+1|gAAAAABiPnvi3Dz8r2vLDCq_ovKlf3YV5F27BeNy6JBMETdOrTXAYNgRNlbhibsXpFMTwgo57jSeRW6xSbHqUchajP5Yzo4HAsxBxFWJsyMUtH4g4Jh-Ne0w1IHyouv3RkWl0uCGAyCNHnCgCLgYKGMcF653FJrkFZOxYKqQibxhAMiWcg-HzyXuATNxJj_UztgGdvzbX-ZFuaTrOXMYlmtSNAztAucHtvJkRgIXZJI9tKkmteupsA4Js8Tj50QNqurQ0SK365wUyYYUew2ExmSTW6Xm__JzhFZQ7x0IzMY7TcpMXJdhO3dDVCYWfDiLWYzAC8vPd_TyERS2q4EY4PeddbICGppPNg==|gAAAAABiPnvizah4pcf4lpCaxAxiAyBCMaLIHkHe6efAtY7WnBSRuFpbu5XXZHirYZ2Zx1ITvHpr7F0IS04kswy0nWwUjcqRrg==|0|1|2|gAAAAABiPnviHMYkgfJYsMhpqCOmXyuWJlT6BDdT0UXbm6a2Dc_yqFC1B-OwwR5THJqBviajGVte-OPze8_4v9O5ZDRW_70xWdgFEPDP4xzBSAfEnW1Ayg4=
+2|gAAAAABiPnvwHYbLgbyK_BJiSMk0fDlhHEbmDTYIpBr1wL8Zvozz685CK_eAtYeyLTGIynuKQk1hCnp8vNj5BURMVsyBDnxcsSmeXMHw9nTNZ0uyFiVAqg0YGFwp4gqB9WQpFOZ7oFj7Nh2iga6A3BK9TB73TdEviP9lXYN-97vpu83VIYSALbCCsQKP5LGILrn2CukJwllARf0UBvaTmOf5Q-J5dh4hf_kGFB597rAZbb8tbz3FCalWRWeE4LkSGtQpMXdt32b3zP7Izyeklt4PvfsGy4mfg8QlzYCSbPxK4WB305Ky-KzM4RgIda6Vj25injmJ5swf1ZE37x--KrDj7Ssi5dylZQ==|gAAAAABiPnvwqxqi91oQydWCgBZpJK8NPdqff8OvQqhyJGjfD61zDgCJsmTgPgDXzzJ1AtIAL8_QGt0wad1wihLAoSuZ6EUygQ==|0|1|1|gAAAAABiPnvw9WMHbEwCjWj_NCcjWJjYHiA-Eun1ghdQy3WXUBaRU7H71TgYhmM4weB9buukvee7EFcN3fxofekZBIKCNiAtDIFc-sWu2-N8Plb-o46cotY=
+
+
+Issues:
+
+After implementing the encyption, I encountered the issue 'cyptography.fernet.InvalidToken' which could have been resolved by 
+-either deleting the db and then repopulating it 
+-or migrating data from encrypted column to a new column and then deleting the old one. 
+
+In this case, I used the first solution. Although, all the old user accounts were deleted and I had to recreate them 
+but this solution worked and I could access all the functionalities of the site.
+
+
+Storing the Secret Key:
+
+Using the python decouple library I accessed the secret key using:
+SECRET_KEY = config(‘SECRET_KEY”)
+This secret key is stored in and .env file that separates it from the settings data and prevents it from being exposed.
+While committing the repository we can add this file to gitignore and will not end up pushing it to our repository.
+I ended up pushing it to the repository for now to pass the test cases.
+
+Another option we can use is store the secret key in environment variable and access it using
+os.getenv('SECRET_KEY')

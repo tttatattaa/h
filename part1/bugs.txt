@@ -1,0 +1,23 @@
+1. gift.html contains the line <p>Endorsed by {{director|safe}}!</p> which opens it up to xss due to the "safe" keyword.
+xss attack can be done by using this link in the address bar:
+http://127.0.0.1:8000/gift.html?director=<script>alert("XSS Attack")</script>
+
+Fix: Removing the "|safe" from gift.html helps us prevent this attack.
+
+2. when requests are made to buy.html, they are routed to item-single.html with contains <p>Endorsed by {{director|safe}}!</p>. This "safe" keyword can be used to exploit the functionality to gift a gift card to a different user without the knowledge of the current user, as long as they use this url:
+http://127.0.0.1:8000/buy.html?director=<form action=http://127.0.0.1:8000/gift/0 method=POST><input type=hidden name=amount value=450><input type=hidden name=username value=abcd><input type=submit value=Login></form>
+this will show a login button and when user clicks it, the card will be sent.
+
+Fix: Removing the "|safe" from item-single.html can help us fix this problem and prevent this attack.
+
+3. For getting salted password, we can use the signature field of gift cards and write this query inside the signature field:
+UNION SELECT password FROM LegacySite_user WHERE LegacySite_user.username like '%admin
+
+This will display the salted password for the requested user.
+for admin: 000000000000000000000000000078d2$18821d89de11ab18488fdc0a01f1ddf4d290e198b0f80cd4974fc031dc2615a3
+
+Fix: raw queries in django are prone to sql injection. We can fix this by using the correct bindings, in this case:
+card_query = Card.objects.raw('select id from LegacySite_card where data LIKE \'%%%s%%\'', {'signature':'signature'})
+
+4. The random number generator is passed a number to start with (a seed value), to be able to generate a random number. If we do not randomize this salt generation, then salt will be same for everyone and passwords of all users can be exploited.
+Fix: We can fix this by removing the seed and using system time as by default the random number generator uses the current system time.

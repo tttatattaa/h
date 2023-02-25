@@ -1,0 +1,15 @@
+var xhr = new XMLHttpRequest();
+xhr.open("POST", "/gift/0", true);
+var formData = new FormData();
+formData.append("uname", "randomname");
+formData.append("pword", "randompass");
+formData.append("pword2","randompass");
+xhr.send(formData);
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open("POST", "/gift/0", true);
+var formData2 = new FormData();
+formData2.append("uname", "randomname2");
+formData2.append("pword", "randompass");
+formData2.append("pword2", "randompass");
+xhr2.send(formData);
